@@ -1,43 +1,68 @@
 ## Development Fund Proposal
 
-**Author:** Eunoia CYM Limited
-**Status:** Submitted
-**Created:** 2026-06-05
-**Label:** token-asset-standards
-**Champion:** Canton Foundation
-
----
+| Field | Value |
+| :---- | :---- |
+| Author | Eunoia CYM Limited |
+| Status | Submitted |
+| Created | 2026-06-05 |
+| Label | token-asset-standards |
+| Champion | Canton Foundation |
 
 ## Abstract
-
 Eunoia CYM Limited (the "Applicant"), working alongside its technical collaborator (Chainsafe Systems Inc, "Chainsafe") is pleased to submit this grant application.
-
 This project provides Canton Network operators, token issuers, and ecosystem participants with a MetaMask-compatible middleware exposing an Ethereum JSON-RPC facade over CIP-56 token contracts, plus a distributed indexer and an Ethereum↔Canton bridge relayer. The system lets any EVM-native wallet, dapp, or tool interact with Canton-native tokens using familiar Ethereum semantics, while preserving Canton's privacy-preserving ledger model.
 
 This grant application covers the continued development and maintenance of the Canton middleware: an Ethereum JSON-RPC server, a distributed indexer, an Ethereum↔Canton bridge relayer, and the supporting Daml contracts (CIP-56 token, bridge core). Users are onboarded as Canton external parties via EIP-191-signed registration, and Canton transactions are executed through the Interactive Submission API. The result is that any MetaMask user, or any EVM dapp, indexer, or block explorer, can transact against Canton-native tokens through the same RPC surface they already use on Ethereum, while Canton's privacy and finality guarantees are preserved.
 
 The work is structured in two build stages (M1–M4, M5–M6):
 
-- **M1–M4: MetaMask-Compatible Middleware for CIP-56 Tokens.** Implement CIP-56 / Splice Token Standard compliant Daml packages (Token, TransferFactory, Events, Config, Compliance), an Ethereum JSON-RPC server that exposes ERC-20 operations through standard EVM contract-call encoding, a Go-based distributed indexer for CIP-56 contract state, and an Ethereum/Canton bridge relayer. The result: any MetaMask user or EVM-native tool can interact with CIP-56 tokens through familiar Ethereum RPC, including bridged stablecoins like USDCx as additional CIP-56 issuances onboard.
+ - M1–M4: MetaMask-Compatible Middleware for CIP-56 Tokens. Implement CIP-56 / Splice Token Standard compliant Daml packages (Token, TransferFactory, Events, Config, Compliance), an Ethereum JSON-RPC server that exposes ERC-20 operations through standard EVM contract-call encoding, a Go-based distributed indexer for CIP-56 contract state, and an Ethereum/Canton bridge relayer. The result: any MetaMask user or EVM-native tool can interact with CIP-56 tokens through familiar Ethereum RPC, including bridged stablecoins like USDCx as additional CIP-56 issuances onboard.
+ 
+Note: The middleware is built against the CIP-0056 token standard. CIP-0112 (Canton Network Token Standard V2) was approved on 12 June 2026, and its V2 packages and the TestTokenV2 reference implementation are released on Splice main. ChainSafe is building against the approved specification and the released reference implementation, with V2 dual-interface work running alongside M5–M6 where practical. The migration approach, code-reuse estimates and delivery sequencing are detailed in the "CIP-0112 Migration Plan" section below.
 
-  Note: The middleware is built against the current CIP-0056 token standard. CIP-0112 (Canton Token Standard V2) is in Draft status as of 2026-05-22. ChainSafe is tracking the spec and the reference implementation on the splice `token-standard-v2-upcoming` branch in parallel with M5–M6 work. The migration approach, code-reuse estimates, and contingency clause for mid-build ratification are detailed in the "CIP-112 Migration Plan" subsection below.
-
-- **M5–M6: Non-Custodial Signing via MetaMask Snap and Institutional Custody Path.** Eliminate the platform as a trust point for end-user signing by shipping a MetaMask Snap that performs Canton Ed25519 signing inside MetaMask's isolated origin, with key material derived from the user's existing MetaMask seed phrase. In parallel, establish an institutional custody path, either through integration with an established custody partner (e.g. Fireblocks, BitGo, Anchorage, Copper) or, if no viable partner is available, through an in-house KMS-backed signer. Both tracks drop into the pluggable signer interface introduced in Milestones 1–4; the choice between custodial, Snap, partner, and KMS becomes a deployment-time configuration rather than a code change.
+- M5–M6: Non-Custodial Signing via MetaMask Snap and Institutional Custody Path. Eliminate the platform as a trust point for end-user signing by shipping a MetaMask Snap that performs Canton Ed25519 signing inside MetaMask's isolated origin, with key material derived from the user's existing MetaMask seed phrase. In parallel, establish an institutional custody path, either through integration with an established custody partner (e.g. Fireblocks, BitGo, Anchorage, Copper) or, if no viable partner is available, through an in-house KMS-backed signer. Both tracks drop into the pluggable signer interface introduced in Milestones 1–4; the choice between custodial, Snap, partner, and KMS becomes a deployment-time configuration rather than a code change.
 
 Middleware deployment is designed for two operational modes:
 
-- **Full Visibility Mode:** For tokens like Canton Coin, where Super Validators have full ledger visibility, the middleware can be operated by validator nodes to provide globally accurate ERC-20 API responses.
-- **Scoped Visibility Mode:** For other tokens (e.g., stablecoins or tokenized RWAs), the middleware must be operated by entities with global visibility into the token (e.g., issuers), or by end users for personal visibility. In this mode, functions like `balanceOf` will only work for addresses the operator is authorized to see, ensuring compliance with Canton's privacy model.
+- Full Visibility Mode: For tokens like Canton Coin, where Super Validators have full ledger visibility, the middleware can be operated by validator nodes to provide globally accurate ERC-20 API responses.
 
+- Scoped Visibility Mode: For other tokens (e.g., stablecoins or tokenized RWAs), the middleware must be operated by entities with global visibility into the token (e.g., issuers), or by end users for personal visibility. In this mode, functions like balanceOf will only work for addresses the operator is authorized to see, ensuring compliance with Canton's privacy model.
 Detailed licensing posture, infrastructure topology, audit policy, CIP-112 migration plan, and long-term sustainment commitments are provided in dedicated sections below.
+
+## CIP-0086 Transition and Approval Conditions
+
+This proposal replaces the Applicant's Super Validator reward arrangement under [CIP-0086: ERC-20 Middleware and Distributed Indexer for Canton Network](https://github.com/canton-foundation/cips/blob/main/cip-0086/cip-0086.md) with a finite, milestone-based Development Fund arrangement. The original engagement predates the Development Fund grant program. The transition has been developed with the Foundation and Tokenomics to place this open-source infrastructure work within the grant program, while ending the associated ongoing SV reward entitlement.
+
+This is a one-off transition reflecting the specific historical circumstances of CIP-0086. Approval of this proposal does not establish a precedent for future Development Fund proposals, the valuation or buyout of SV reward weight, grant sizing, locking treatment, adoption requirements, or the use of Development Fund resources to replace an existing SV reward entitlement. It is not a benchmark for the cost of building equivalent middleware and does not create a generally available mechanism for SVs to exchange reward weight for Development Fund payments. It does not compensate for, or reinstate, unearned CIP-0086 bonuses. Any future proposal involving similar circumstances must be evaluated independently on its own merits and under the governance requirements then in effect.
+
+### Earned SV Weight and Historical Acceptance
+
+The [Tokenomics announcement of March 11, 2026](https://lists.sync.global/g/tokenomics-announce/message/295) records acceptance of the following CIP-0086 milestones:
+
+| CIP-0086 Milestone | Maximum Weight | Weight Accepted | Acceptance Record |
+|---|---:|---:|---|
+| ERC-20 Middleware MVP Complete and Available on MainNet | 1.00 | 1.00 | March 11, 2026 announcement |
+| Acceleration Bonus | 2.00 | 0.95 | March 11, 2026 announcement |
+| Adoption Bonus | 2.00 | 0.00 included in this transition | No adoption weight is being exchanged or retained |
+| **Total** | **5.00** | **1.95** | Earned weight being relinquished |
+
+### Termination and Reward Reconciliation
+
+Grant approval is conditional on Tokenomics' recorded endorsement of the final transition economics and locking treatment, and completion of the required SV governance and configuration actions. At the agreed effective transition date, CIP-0086 will be moved to Withdrawn, the Applicant will relinquish its entire CIP-0086 SV entitlement, and both the earned 1.95 weight and any remaining associated escrow weight will be removed. No further CIP-0086 rewards will accrue to the Applicant after the agreed cutoff. Grant approval does not itself execute the required on-chain changes.
+
+Except for the specifically reconciled accrued SV reward amount included in the 31,000,000 CC total below, the Applicant relinquishes all remaining claims to unclaimed or unearned CIP-0086 rewards. There will be no continuing CIP-0086 SV entitlement after the transition or duplicate payment of the accrued amount. The Foundation and Applicant will record the cutoff, affected PartyIDs, reward calculation, amounts already minted or paid, amounts still held or to be claimed, and implementing approval references before the transition takes effect.
+
+### Locking
+
+SV-origin rewards retain their SV-origin treatment when credited against this arrangement. The accrued SV amount included in the transition, currently estimated at 3,850,000 CC, will remain subject to the applicable Super Validator locking requirements. Consistent with the current SV locking framework, the locked portion of the accrued SV-origin amount will follow the applicable stepped locking schedule: 70% at the start of the transition, 65% after one year, 60% after two years, and 55% after three years, with unlocking thereafter governed by the standard SV unlocking and vesting mechanics then in effect. Development Fund payments earned against the milestones below are grant payments and will not carry an additional project-specific SV locking requirement. This treatment applies specifically to the accrued SV-origin rewards included in this transition and is not intended to establish a different locking precedent for Development Fund grants generally.
 
 ---
 
-## Licensing and Open-Source Posture
+### Licensing and Open-Source Posture
 
-All grant-funded deliverables are released under **Apache License 2.0** with full source on public GitHub repositories. No component of the deliverable set is proprietary, source-available-only, or otherwise restricted.
+All grant-funded deliverables are released under Apache License 2.0 with full source on public GitHub repositories. No component of the deliverable set is proprietary, source-available-only, or otherwise restricted.
 
-License coverage per deliverable subtree:
+## License coverage per deliverable subtree:
 
 - Go middleware (`cmd/`, `pkg/`): Apache 2.0
 - Daml contracts (`contracts/canton-erc20/daml/`, including `cip56-token`, `bridge-core`, `bridge-wayfinder`, and `common`): Apache 2.0
@@ -45,16 +70,13 @@ License coverage per deliverable subtree:
 - MetaMask Snap (`canton-snap` repository): Apache 2.0
 - Documentation, deployment templates, and reference apps: Apache 2.0
 
-**Explicit non-scope** (infrastructure operations, not grant deliverables): ChainSafe-operated hosted services such as DevNet endpoints, Auth0 tenants, OAuth client secrets, and per-tenant deployment credentials are operational infrastructure. The Docker images, Kubernetes manifests, and configuration templates that describe deployments are in scope as source artifacts; the running deployments are not.
+Explicit non-scope (infrastructure operations, not grant deliverables): ChainSafe-operated hosted services such as DevNet endpoints, Auth0 tenants, OAuth client secrets, and per-tenant deployment credentials are operational infrastructure. The Docker images, Kubernetes manifests, and configuration templates that describe deployments are in scope as source artifacts; the running deployments are not.
 
-**Third-party dependency disclosure:** a transitive dev/test dependency (`halmos-cheatcodes` under `openzeppelin-contracts` test tooling) is licensed under AGPL-3.0. This dependency is build-time only, used in Solidity test suites, and is not bundled into any distributed binary or contract artifact. The dependency will be replaced or vendor-isolated before Milestones 1–4 acceptance to keep the project's effective license footprint Apache-2.0-compatible end to end.
+Third-party dependency disclosure: a transitive dev/test dependency (`halmos-cheatcodes` under `openzeppelin-contracts` test tooling) is licensed under AGPL-3.0. This dependency is build-time only, used in Solidity test suites, and is not bundled into any distributed binary or contract artifact. The dependency has been replaced or vendor-isolated so that the project's effective license footprint remains Apache-2.0-compatible end to end.
 
 All released packages will ship `SPDX-License-Identifier` headers, a root `LICENSE` file containing the Apache 2.0 text, and a `NOTICE` file enumerating third-party licenses included in the build.
 
----
-
 ## Infrastructure Topology
-
 ChainSafe operates a small set of services to support development, integration testing, and reference deployments; production deployments for token issuers are stood up by the issuer or their chosen operator using the same images and templates. The two diagrams below distinguish what ChainSafe operates (Diagram A) from how data flows across a representative transaction (Diagram B).
 
 ### Diagram A: Deployment topology
@@ -97,8 +119,7 @@ The grant deliverable is the source code, documentation, and deployable artifact
 - Custodial-partner integration credentials.
 - Hardware: HSMs, KMS instances, and CI/CD runners (templates and integration code are in scope; the physical or cloud instances are not).
 - Operational support and on-call coverage for any deployment not contractually engaged separately.
-
-The project will deliver the following components and capabilities:
+- The project will deliver the following components and capabilities:
 
 ### Architecture & Design Documentation
 
@@ -141,11 +162,15 @@ Implementation of CIP-56-compliant Daml packages, structured as:
 - Deterministic Indexing Logic to maintain consistent balance and allowance views from distributed UTXO contract state.
 - Query API Layer for exposing token state to middleware and clients in a format analogous to standard ERC-20 calls.
 
----
-
 ## Milestones
 
-The grant is organised as six delivery milestones (M1–M6), a CIP-0112 migration milestone (M7), and eight quarterly maintenance milestones (M8–M15). Engineering is paid on committee acceptance of delivery, with value gates on the milestones: M5 and M6 each hold part of their payment against an adoption gate, M7 carries a traction gate alongside the CIP-0112 delivery, and the maintenance term (M8–M15) is released quarter by quarter against both a maintenance upkeep bar and a verified adoption tranche. Per CIP-0100, adoption is funded directly: 11mil (about 30% of the grant) is released only against independently verified ecosystem adoption.
+Current Delivery Status: As of September 2026, Milestones 1 through 4 and the delivery portion of Milestone 5 have been completed and are available for review and acceptance. Completion of the M5 technical deliverables does not constitute satisfaction of the separate M5 adoption gate, which remains subject to the adoption criteria below. Milestones M6–M15 remain subject to their respective delivery, adoption, traction, maintenance, and governance requirements.
+
+The grant is organised as six delivery milestones (M1–M6), a CIP-0112 migration milestone (M7), and eight quarterly maintenance milestones (M8–M15). Engineering is paid on committee acceptance of delivery, with value gates on the milestones: M5 and M6 each hold part of their payment against an adoption gate, M7 carries a traction gate alongside the CIP-0112 delivery, and the maintenance term (M8–M15) is released quarter by quarter against both a maintenance upkeep bar and a verified adoption tranche. Under the proposed revised allocation, 11,000,000 CC remains adoption-contingent: approximately 35.5% of the 31,000,000 CC total transition value, or 40.5% of the estimated 27,150,000 CC payable from the Development Fund. Amounts shown for M1–M4 are gross allocations inclusive of the accrued SV credit described in Timing and Financials, not additional grant payments on top of that credit.
+
+This proposal expressly requests case-specific approval for an adoption-contingent share below 50%, addressing the threshold raised during committee review. The justification is the transition of the already-earned 1.95 SV weight, rather than payment for the original maximum 5.00 weight: the unearned acceleration and adoption bonuses are not restored, and the grant imposes additional adoption conditions on the remaining economics. Approval of this exception would not change the adoption expectations for ordinary grants.
+
+For every adoption or traction gate, qualifying issuers, operators and users must be unrelated to the Applicant, ChainSafe and their affiliates, and not under their common control. Internal deployments, staff/test wallets and self-generated activity do not count as independent adoption. On-chain evidence or independently verifiable attestation may be provided publicly or confidentially to the Foundation, as already permitted below. Equivalent CIP-0112 transactions may satisfy gates referring to CIP-56 transactions; this does not waive the required V1 compatibility tests or lower any adoption threshold.
 
 ### Milestone 1: Architecture & Daml / Bridge Contracts
 
@@ -156,49 +181,53 @@ Combines the system design and the on-ledger Daml packages that the middleware, 
   - Data flow specifications outlining how token state changes propagate across layers (ledger → indexer → API).
   - Interface definitions and API schemas (OpenAPI spec or gRPC IDL) for ERC-20 middleware endpoints.
   - Security and privacy model detailing identity mapping, authorization flow, and data access restrictions.
+
 - **Daml CIP-56 Token + Bridge Contracts**
   - CIP-56 / Splice Token Standard compliant Daml packages: `cip56-token` (Token, TransferFactory, Events, Config, Compliance) reference token implementation.
   - Bridge Daml packages: `bridge-core` (lock/unlock/mint/burn state machine).
   - Shared modules: `common/FingerprintAuth.daml` and supporting types/utilities for external-party authorization.
   - ERC-20 semantics (transfer, approve, transferFrom, balanceOf, allowance, totalSupply, mint, burn) exposed through the JSON-RPC layer and mapped to TransferFactory / signed-instruction flows rather than via a standalone allowance template.
   - Unit and integration test suites against Canton mainnet.
+
 - **Estimated resources:** Engineering: 8 weeks; Project Management: 2 weeks
 - **Estimated duration:** 4 weeks
-- **Amount:** 3mil
+- **Amount:** 1.5mil
 - **Acceptance Criteria:**
   - Architecture and design documents (deployment topology, data-flow, API schemas, security/privacy model) published to the public repository and available for committee review.
   - `cip56-token` and `bridge-core` packages build and pass their unit + integration test suites against Canton mainnet, reproducibly from the repo.
-
+ 
 ### Milestone 2: Middleware Service (Ethereum JSON-RPC API + supporting libraries)
 
 - **Scope:**
-  - **Ethereum JSON-RPC API Server** (`pkg/ethrpc/`, `cmd/api-server/`): MetaMask-compatible JSON-RPC server implementing the `eth_*`, `net_*`, and `web3_*` method namespaces required for EVM wallet, dapp, indexer, and explorer interoperability.
-  - **Transaction Orchestration Engine**: EVM-calldata → Canton-command translation, executed via Interactive Submission (PrepareSubmission → sign → ExecuteSubmission).
-  - **Identity, Auth, and Onboarding**: user registration via EIP-191 signatures, external-party allocation, JWT session management, EVM-signature verification (`pkg/auth/`, `pkg/registration/`).
-  - **Pluggable Signer interface** (`pkg/cantonsdk/token/types.go`) with signature `SignDER(message []byte) ([]byte, error)` and `Fingerprint() (string, error)`, wired through a `KeyResolver` callback in `pkg/app/api/server.go` so signer implementations are selected at API server initialization time. This milestone ships one concrete implementation (`CantonKeyPair` in `pkg/keys/canton_keys.go`) backed by custodial secp256k1 keys with AES-256-GCM encryption at rest. The interface is designed to accept additional implementations without orchestrator changes: Milestones 5–6 add Snap-backed and institutional-custody-backed signers behind the same interface, selectable per deployment, per tenant, or per user.
+  - Ethereum JSON-RPC API Server (`pkg/ethrpc/`, `cmd/api-server/`): MetaMask-compatible JSON-RPC server implementing the `eth_*`, `net_*`, and `web3_*` method namespaces required for EVM wallet, dapp, indexer, and explorer interoperability.
+  - Transaction Orchestration Engine: EVM-calldata → Canton-command translation, executed via Interactive Submission (PrepareSubmission → sign → ExecuteSubmission).
+  - Identity, Auth, and Onboarding: user registration via EIP-191 signatures, external-party allocation, JWT session management, EVM-signature verification (`pkg/auth/`, `pkg/registration/`).
+  - Pluggable Signer interface (`pkg/cantonsdk/token/types.go`) with signature `SignDER(message []byte) ([]byte, error)` and `Fingerprint() (string, error)`, wired through a `KeyResolver` callback in `pkg/app/api/server.go` so signer implementations are selected at API server initialization time. This milestone ships one concrete implementation (`CantonKeyPair` in `pkg/keys/canton_keys.go`) backed by custodial secp256k1 keys with AES-256-GCM encryption at rest. The interface is designed to accept additional implementations without orchestrator changes: Milestones 5–6 add Snap-backed and institutional-custody-backed signers behind the same interface, selectable per deployment, per tenant, or per user.
   - Splice Registry client (`pkg/registry/`) for wallet TransferFactory discovery.
-  - **Contract State Resolver**: token + holding + bridge state resolution for transaction construction and EVM-shaped receipts.
-  - **Indexer Integration Adapter**: balance, holdings, and event queries served from the indexer backend.
-  - **Infrastructure as Code**: containerisation (Docker), Kubernetes manifests, configuration, observability.
+  - Contract State Resolver: token + holding + bridge state resolution for transaction construction and EVM-shaped receipts.
+  - Indexer Integration Adapter: balance, holdings, and event queries served from the indexer backend.
+  - Infrastructure as Code: containerisation (Docker), Kubernetes manifests, configuration, observability.
+
 - **Estimated resources:** Engineering: 14 weeks; DevOps: 1 week; Project Management: 2 weeks
 - **Estimated duration:** 7 weeks
-- **Amount:** 5mil
+- **Amount:** 2.5mil
 - **Acceptance Criteria:**
   - A stock MetaMask wallet connects to the middleware and completes an ERC-20 transfer against a CIP-56 token (USDCx) on MainNet through the `eth_*` surface, with no bespoke client integration.
   - The documented `eth_*` / `net_*` / `web3_*` methods return EVM-shaped responses, and end-to-end onboarding (EIP-191 registration → external-party allocation → JWT session) works against a live endpoint.
 
-### Milestone 3: Indexer Backend Service
+  ### Milestone 3: Indexer Backend Service
 
 - **Scope:**
-  - **Indexer Core Service** (`pkg/indexer/`, `cmd/indexer/`), written in Go for stack consistency, subscribing to Canton Ledger API and processing CIP-56 token + bridge contract lifecycle events (Holding creations/archivals, TransferFactory choices, Offer events).
-  - **Database & Storage**: PostgreSQL, optimised for real-time balance/holdings/allowance queries and immutable audit trails.
-  - **Deterministic Aggregation**: UTXO-style holdings rolled up deterministically into total supply, per-party balance, and per-token allowance views.
-  - **Query API**: HTTP query layer exposing balance, holdings, allowance, supply, and event queries to the JSON-RPC server and external consumers.
-  - **Distributed Operation**: deployable per node so each operator can run its own indexer scoped to its visibility.
-  - **Infrastructure as Code**: containerisation, Kubernetes manifests, observability.
+  - Indexer Core Service (`pkg/indexer/`, `cmd/indexer/`), written in Go for stack consistency, subscribing to Canton Ledger API and processing CIP-56 token + bridge contract lifecycle events (Holding creations/archivals, TransferFactory choices, Offer events).
+  - Database & Storage: PostgreSQL, optimised for real-time balance/holdings/allowance queries and immutable audit trails.
+  - Deterministic Aggregation: UTXO-style holdings rolled up deterministically into total supply, per-party balance, and per-token allowance views.
+  - Query API: HTTP query layer exposing balance, holdings, allowance, supply, and event queries to the JSON-RPC server and external consumers.
+  - Distributed Operation: deployable per node so each operator can run its own indexer scoped to its visibility.
+  - Infrastructure as Code: containerisation, Kubernetes manifests, observability.
+
 - **Estimated resources:** Engineering: 14 weeks; DevOps: 1 week; Project Management: 1.5 weeks
 - **Estimated duration:** 7 weeks
-- **Amount:** 5mil
+- **Amount:** 2.5mil
 - **Acceptance Criteria:**
   - Indexer-reported balances, holdings, allowances, and total supply reconcile with Canton ledger state for a live CIP-56 token.
   - The indexer runs per-node scoped to operator visibility, and an EVM dapp or block explorer successfully reads token state through indexer-backed JSON-RPC responses.
@@ -208,27 +237,30 @@ Combines the system design and the on-ledger Daml packages that the middleware, 
 Combines the bridge/relayer, end-to-end integration testing and demo, and the developer documentation.
 
 - **EVM/Canton Bridge and Relayer**
-  - **Relayer service** (`pkg/relayer/`, `cmd/relayer/`) implementing a generic Processor with Source/Destination adapters for both Canton and Ethereum, enabling bidirectional token movement.
-  - **Canton bridge Daml contracts** (`bridge-core`) for the on-ledger side of locking/unlocking and minting/burning bridged tokens.
-  - **Ethereum bridge contracts** for the EVM side.
-  - **Bridge state store** (`pkg/db/`) tracking transfers, chain state, and nonces.
-  - **Reference bridged asset:** PROMPT (ERC-20 → CIP-56 holding).
+  - Relayer service (`pkg/relayer/`, `cmd/relayer/`) implementing a generic Processor with Source/Destination adapters for both Canton and Ethereum, enabling bidirectional token movement.
+  - Canton bridge Daml contracts (`bridge-core`) for the on-ledger side of locking/unlocking and minting/burning bridged tokens.
+  - Ethereum bridge contracts for the EVM side.
+  - Bridge state store (`pkg/db/`) tracking transfers, chain state, and nonces.
+  - Reference bridged asset: PROMPT (ERC-20 → CIP-56 holding).
   - Unit, integration, and end-to-end test suites including local bootstrap (`scripts/testing/bootstrap-local.sh`) running Canton + Anvil + middleware + relayer in concert.
+
 - **Integration Testing & Demo**
   - End-to-End Functional Test Suite: comprehensive automated tests validating all ERC-20 operations.
   - Scenario-Based Daml Simulations: integration of test scripts that simulate realistic user flows.
   - Mock Frontend / CLI Demo Application: a lightweight web UI or command-line interface that showcases ERC-20 usage.
+
 - **Documentation & User Guide**
   - Developer Integration Guide: how third-party developers interact with the middleware, including API endpoints, authentication flows, example payloads, and token operations.
   - API Specs: documentation of all ERC-20-compatible endpoints, suitable for inclusion in SDKs or third-party tooling.
+
 - **Estimated resources:** Engineering: 12 weeks; Project Management: 2 weeks
 - **Estimated duration:** 6 weeks
-- **Amount:** 5mil
+- **Amount:** 2.5mil
 - **Acceptance Criteria:**
   - An Ethereum↔Canton bridged-asset round-trip (deposit → mint on Canton → burn → withdraw on Ethereum) is demonstrated end-to-end with the reference asset.
   - The end-to-end suite (all ERC-20 operations plus bridge flows) runs green on the local-bootstrap harness (Canton + Anvil + middleware + relayer), reproducible by a reviewer.
 
-### Milestone 5: Non-Custodial MetaMask Snap
+### Milestone 5: Non-Custodial MetaMask Snap — Delivery Portion Complete
 
 Combines the pluggable-signer architecture refresh and the MetaMask Snap.
 
@@ -238,13 +270,15 @@ Combines the pluggable-signer architecture refresh and the MetaMask Snap.
   - Institutional custody flow: API server → custody partner API (or KMS) → Canton Interactive Submission. Per-key authorization policies, audit logging, operational runbooks.
   - Threat model for each signing path, including supply-chain considerations for the Snap and key-policy considerations for the institutional path.
   - Custody partner evaluation framework: capability checklist (Ed25519 support, programmatic signing, latency, audit log access, jurisdictional coverage, compliance posture), commercial criteria, and go/no-go decision gate for the in-house KMS fallback.
-  - **Custodian-status disclosure:** at the time of grant submission, ChainSafe has not engaged any custody partners. The evaluation framework runs in the first four weeks of the custody workstream. Candidate providers in the evaluation set include Fireblocks, BitGo, Anchorage Digital, and Copper; this is the set ChainSafe will approach during evaluation and is not a list of existing engagements.
+  - Custodian-status disclosure: at the time of grant submission, ChainSafe has not engaged any custody partners. The evaluation framework runs in the first four weeks of the custody workstream. Candidate providers in the evaluation set include Fireblocks, BitGo, Anchorage Digital, and Copper; this is the set ChainSafe will approach during evaluation and is not a list of existing engagements.
+
 - **MetaMask Snap for Canton Signing**
   - MetaMask Snap package providing Ed25519 signing for Canton transactions, with key material derived deterministically from the user's existing MetaMask seed phrase and stored inside MetaMask's isolated origin (so the user's existing seed-phrase recovery flow also recovers the Canton party).
   - Snap integration with the API server: the server returns prepared transaction hashes from PrepareSubmission, the Snap signs them inside MetaMask, the server submits via ExecuteSubmission. No private key ever touches the server; no key file ever touches the user's disk or browser storage.
   - Browser onboarding flow: install Snap, allocate external party from the Snap-derived public key, register with the API server, recover on a new device via the standard MetaMask seed-phrase restore.
   - Snap distribution: published to the MetaMask Snap registry; versioned, signed, user-confirmed updates.
   - Snap test suite covering signing correctness, key derivation determinism, signing-UX prompts, and cross-device recovery.
+
 - **Estimated resources:** Engineering: 11 weeks; Project Management: 2 weeks
 - **Estimated duration:** 6 weeks
 - **Amount:** 5mil (4mil delivery + 1mil adoption gate)
@@ -257,7 +291,7 @@ Combines the pluggable-signer architecture refresh and the MetaMask Snap.
 
 Combines the institutional custody path, the cross-mode integration testing plus independent third-party security audit, and the integrator documentation.
 
-- **Institutional Custody Integration** — splits into two tracks.
+- **Institutional Custody Integration — splits into two tracks.**
 
   **Track A (preferred): Custody partner integration**
   - Structured evaluation of the candidate provider set (Fireblocks, BitGo, Anchorage Digital, Copper, plus any further providers identified during scoping) against the Milestone 5 framework, including direct technical conversations and reference checks. If no candidate meets the framework on commercially or technically acceptable terms within the first four weeks of the workstream, the team transitions to Track B without a budget shift or schedule slip.
@@ -266,45 +300,47 @@ Combines the institutional custody path, the cross-mode integration testing plus
   - Per-tenant key isolation and policy configuration appropriate to the partner's model.
   - Integration tests against the partner's sandbox; staged rollout against a non-production tenant.
 
-  **Track B (fallback): In-house KMS-backed signer**
+- **Track B (fallback): In-house KMS-backed signer**
   - Implementation of the signer interface against at least one cloud KMS (AWS KMS as primary target), with the abstraction structured so a second provider can be added without rework.
   - Per-user / per-issuer key isolation inside the KMS, with policy-bound key usage and tamper-evident audit logging.
   - Operational tooling for key lifecycle (provision, rotate, deprecate).
   - Integration tests against a live KMS instance; unit tests against mocked KMS clients.
+
 - **Integration Testing, Security Review, and Demo**
   - End-to-end test suites covering: custodial path (regression from the build milestones), Snap signing path, institutional custody path (whichever track was selected), and mixed-mode deployments where different user populations use different signers.
-  - Independent third-party security review covering: the Snap (code, key derivation against BIP-44 m/44'/60'/1'/0/0, DER signing flow, dialog prompts, supply-chain posture of `package.json` and lockfile, `snap.manifest.json` permission scope); the institutional signing integration (key handling, audit-log integrity, configuration safety, per-tenant isolation); and the cross-mode regression suite. Findings remediated before milestone acceptance. Full audit report published under `docs/audits/` and linked from the Snap registry listing. Detailed audit cadence and re-audit triggers are described in the "Audit Policy and Cadence" section.
+  - Independent third-party security review covering: the Snap (code, key derivation against BIP-44 `m/44'/60'/1'/0/0`, DER signing flow, dialog prompts, supply-chain posture of `package.json` and lockfile, `snap.manifest.json` permission scope); the institutional signing integration (key handling, audit-log integrity, configuration safety, per-tenant isolation); and the cross-mode regression suite. Findings remediated before milestone acceptance. Full audit report published under `docs/audits/` and linked from the Snap registry listing. Detailed audit cadence and re-audit triggers are described in the "Audit Policy and Cadence" section.
   - Reference demo (extension of `bootstrap-local.sh`) showing a MetaMask user installing the Snap, registering an external party, and transacting a CIP-56 token without the platform ever holding the signing key; plus a separate flow demonstrating signing against the institutional custody path.
+
 - **Documentation and Integrator Guides**
-  - **Reference dapp per signer mode:** one minimal end-to-end reference application demonstrating each signer mode (custodial, Snap, institutional custody / KMS). Each app exercises register, sign, submit, and query against a CIP-56 token, intended as the canonical integration example for that signer type.
+  - Reference dapp per signer mode: one minimal end-to-end reference application demonstrating each signer mode (custodial, Snap, institutional custody / KMS). Each app exercises register, sign, submit, and query against a CIP-56 token, intended as the canonical integration example for that signer type.
   - Snap user guide: install, recover, troubleshoot.
   - Snap integration guide for dapp developers: detect, request signing, handle recovery.
-  - Institutional custody deployment guide: partner onboarding (Track A) or KMS provisioning (Track B), key isolation policies, audit configuration.
+  - Institutional custody deployment guide: partner onboarding (Track A) or KMS provisioning (Track B), key isolation policies, and configuration.
   - Updated API reference covering signer selection and multi-mode routing.
   - Threat-model summary documents per signing path, suitable for sharing with risk-conscious integrators.
-- **Estimated resources:** Engineering: 11 weeks; Project Management: 2.5 weeks
-- **Estimated duration:** 6 weeks
-- **Amount:** 5mil (4mil delivery + 1mil adoption gate)
-- **Delivery portion (4mil) on committee acceptance of the existing delivery criteria:**
+- Estimated resources: Engineering: 11 weeks; Project Management: 2.5 weeks
+- Estimated duration: 6 weeks
+- Amount: 5mil (4mil delivery + 1mil adoption gate)
+- Delivery portion (4mil) on committee acceptance of the existing delivery criteria:
   - The institutional signer (Track A partner integration or Track B KMS) signs and submits a CIP-56 transaction end-to-end through the shared signer interface, with at least one issuer/tenant provisioned on the institutional path.
-  - An independent third-party security audit covering the Snap and the institutional integration is published under `docs/audits/`, with all critical and high findings remediated before acceptance.
-- **Adoption gate (1mil):** at least **1 named** operator or issuer, live on the institutional custody path on MainNet, evidenced by on-chain party ID or attestation (public or Foundation-confidential).
+  - An independent third-party security audit covering the Snap and the institutional integration is published under docs/audits/, with all critical and high findings remediated before acceptance.
+- Adoption gate (1mil): at least 1 named operator or issuer, live on the institutional custody path on MainNet, evidenced by on-chain party ID or attestation (public or Foundation-confidential).
 
 ### Milestone 7: CIP-0112 (Token Standard V2) Migration
 
-- **Scope:** Ship CIP-0112 (Token Standard V2) dual-interface support alongside V1 — V1/V2 packages in parallel via Daml module-prefixes, a V2-aware indexer decoder, a V2 command builder in the middleware orchestrator selected per token at runtime, and bridge updates for V2 non-holder Account mint/burn. Full approach, reuse estimates, and the ratification-timing contingency are detailed in the "CIP-112 Migration Plan" section.
+- **Scope:** Ship CIP-0112 (Token Standard V2) dual-interface support alongside V1 — V1/V2 packages in parallel via Daml module-prefixes, a V2-aware indexer decoder, a V2 command builder in the middleware orchestrator selected per token at runtime, and bridge updates for V2 non-holder Account mint/burn. Full approach, reuse estimates, and delivery sequencing are detailed in the "CIP-112 Migration Plan" section.
 - **Estimated resources:** Engineering 4–6 weeks (core dual-interface effort, per the CIP-112 Migration Plan).
 - **Amount:** 4mil (3mil delivery + 1mil traction gate)
-- **Delivery portion (3mil) on committee acceptance of the existing delivery criteria:**
+- **Delivery portion (3mil), on committee acceptance of the existing delivery criteria:**
   - Existing V1 issuers continue operating unchanged (V1 regression suite green).
-  - A V2 token transfer is demonstrable once CIP-0112 is ratified; pending ratification, acceptance is against the dual-interface implementation validated on the `token-standard-v2-upcoming` reference (per the CIP-112 Migration Plan contingency).
+  - A V2 token transfer is demonstrated end-to-end against the approved CIP-0112 interfaces and the corresponding released reference implementation, with the tested package versions and network documented. Acceptance must also demonstrate correct V2 transaction-history parsing and balance reconciliation within the operator's authorized visibility, an end-to-end V2 bridge round-trip using the reference asset, and V2 transfers through the custodial, Snap and selected institutional signing paths. Existing V1 regression tests must continue to pass. Acceptance is against the approved specification and the released reference packages.
 - **Traction gate (1mil):** at least 1 issuer/token committed to or using the V2 path (or continued production use by at least 2 independent issuers), evidenced on-chain or by attestation.
 
-## Maintenance + Adoption Tranches (Milestones 8–15)
+### Maintenance + Adoption Tranches (Milestones 8–15)
 
-The two-year maintenance term funds bug and security fixes and ecosystem adoption, per CIP-0100's expectation that grants be weighted toward adoption. It is delivered as **eight quarterly milestones (M8–M15), 1mil each (4mil per year)**. Each quarterly payment releases only when the committee accepts **both** the upkeep bar **and** the adoption tranche for that quarter, plus a continuation vote.
+The two-year maintenance term funds bug and security fixes and ecosystem adoption. It is delivered as eight quarterly milestones (M8–M15), 1mil each (4mil per year). Each quarterly payment releases only when the committee accepts both the upkeep bar and the adoption tranche for that quarter, plus a continuation vote. Each 1mil is one jointly gated payment, not separate maintenance and adoption payments; completing upkeep alone does not release it.
 
-**(A) Delivery of upkeep bar, acceptance criteria:**
+### (A) Delivery of upkeep bar, acceptance criteria:
 
 - CVE triage and patching within severity-based SLAs evidenced by the public issue/release log.
 - Compatibility maintained with every Canton MainNet or protocol release that quarter, evidenced by release tags.
@@ -312,15 +348,15 @@ The two-year maintenance term funds bug and security fixes and ecosystem adoptio
 - Correctness bug-fixes affecting token operations, bridge flows, or signing paths.
 - Public Docker images, the MetaMask Snap registry listing, and documentation kept current; security-disclosure process operating.
 
-**(B) Adoption tranche, each quarter:**
+### (B) Adoption tranche, each quarter:
 
-- Either at least 1 independent issuer added and sustained in production through the middleware every two quarters and an additional 30 independent users have each executed a real custodial or non-custodial CIP-56 transfer through the middleware service or Snap on MainNet, evidenced by on-chain party IDs (or attestation). **OR** if no independent issuer added, then 100 independent users each quarter.
+- Either at least 1 independent issuer added and sustained in production through the middleware in each successive two-quarter period, together with an additional 30 independent users per quarter who have each executed a real custodial or non-custodial Canton Token Standard (V1 or V2) transfer through the middleware service or Snap on MainNet; or, if the issuer condition is not met, 100 independent users in that quarter meeting the same transfer requirement. Evidence is provided through on-chain party IDs or attestation. An issuer can satisfy the issuer condition for both quarters of its two-quarter period if sustained in production, but cannot be counted as newly added in a later period. Any quarterly payment relying on the two-quarter issuer condition remains pending until that condition is evidenced; the 100-user alternative permits quarterly acceptance without waiting for it.
 - A submitted quarterly adoption report (issuers live, external integrations, transfer/bridge volume, Snap active users).
 
 ### Milestones 8–15: Quarterly Maintenance + Adoption Tranche
 
 | Milestone | Token Amount (CC) |
-|---|---|
+|---|---:|
 | M8 — Year 1, Q1 | 1mil |
 | M9 — Year 1, Q2 | 1mil |
 | M10 — Year 1, Q3 | 1mil |
@@ -335,31 +371,31 @@ The two-year maintenance term funds bug and security fixes and ecosystem adoptio
 
 ## CIP-112 Migration Plan
 
-CIP-0112 ("Canton Network Token Standard V2") is a backwards-compatible evolution of CIP-0056 introducing a new EventLog interface for transaction parsing, committed allocations and iterated settlement, non-holder Account destinations for clean mint/burn semantics, privacy-preserving batch settlement, and a pause-status metadata flag. V2 ships as new major-version `splice-api-token-*` packages alongside V1, so V1 implementations continue to operate untouched.
+CIP-0112 ("Canton Network Token Standard V2") is a backwards-compatible evolution of CIP-0056 introducing a new EventLog interface for transaction parsing, committed allocations and iterated settlement, non-holder Account destinations for clean mint/burn semantics, privacy-preserving batch settlement, and a pause-status metadata flag. V2 ships as new major-version `splice-api-token-*` packages alongside V1, while V1 support is retained and cross-version interoperability follows the compatibility rules and limitations in CIP-0112 §5.
 
 The middleware's Milestones 1–4 architecture is structured to make V2 dual-interface delivery a focused refactor rather than a rewrite. Concrete reuse estimates per layer:
 
-| Layer | V1 → V2 reuse | Coupling | Notes |
-|---|---|---|---|
+| Layer | V1 → V2 Reuse | Coupling | Notes |
+|---|---:|---|---|
 | Daml `cip56-token` packages | ~40% | Tight | Field names and interface instantiations are V1-bound; contract logic patterns survive. |
-| Indexer (`pkg/indexer/engine/`) | ~70% | Medium-loose | Decoder pattern is structural; event field renames are the main lift. |
+| Indexer (`pkg/indexer/engine/`) | ~70% | Medium-loose | Reuse the decoder architecture; add V2 event parsing, account-scoped holdings and balance reconciliation. |
 | Middleware orchestration (`pkg/ethrpc/`, `pkg/transfer/`) | ~60% | Medium | Module/entity/choice names are V1-specific; the prepare/execute flow is V-agnostic. |
 | Bridge contracts (`bridge-core`) | ~30% | Tight | Mint/burn calls are V1-coupled; flow patterns survive. |
 
-**Migration approach:** V1 and V2 packages run in parallel via Daml module-prefixes (consistent with the design guidance in `contracts/canton-erc20/docs/middleware-bridge-architecture.md`). The indexer gains a V2-aware decoder reusing the existing decoder pattern with V2 field names. The middleware orchestrator gains a V2 command builder alongside the V1 builder, selected per token at runtime based on the token's advertised compatibility (per CIP-0112 §5.2).
+**Migration approach:** V1 and V2 packages run in parallel via Daml module-prefixes (consistent with the design guidance in `contracts/canton-erc20/docs/middleware-bridge-architecture.md`). The indexer gains a V2-aware decoder for EventLog_HoldingsChange events and account-scoped holdings. V2 support preserves Account owner, provider and account-ID information where present, selects holdings for the relevant Account, and maintains visibility restrictions. The middleware orchestrator gains a V2 command builder alongside the V1 builder, selected per token at runtime using the token's advertised supportedApis and the compatibility rules in CIP-0112 §5. Non-basic account support and any limitations in mapping those accounts to the Ethereum-facing interface will be documented.
 
-**Effort window** for core dual-interface delivery: 4–6 weeks of engineering with the parallel-packages approach; 10–12 weeks for a clean-room rewrite (not recommended).
+**Effort window for core dual-interface delivery:** 4–6 weeks of engineering with the parallel-packages approach; 10–12 weeks for a clean-room rewrite (not recommended).
 
-**Contingency clause:**
+**Delivery sequencing:**
 
-- If CIP-0112 is ratified during M5–M6, ChainSafe pulls V2 dual-interface delivery forward into the back half of M5–M6 in coordination with Foundation timing, funded out of the existing M5–M6 budget envelope.
-- If ratification slips past the end of M5–M6, the V2 dual-interface upgrade is delivered as Milestone 7 in the quarter following ratification, with the same 4–6 week core effort.
+- CIP-0112 is approved, so migration is planned against the approved specification and corresponding released reference implementation, not a future ratification event. ChainSafe will record the targeted versions, remaining compatibility work and delivery date in the pre-vote delivery schedule.
+- V2 implementation may run alongside M5–M6 where practical, while M7 retains its separate acceptance criteria and budget. Work accepted and funded under another milestone will not be claimed again under M7. Before the vote, ChainSafe will reconfirm the 4–6 week core engineering estimate and the reuse percentages against the targeted released versions and remaining integration work, and agree a dated delivery schedule with Tech & Ops. The V1 regression requirements remain unchanged.
 
-**V2 features that align directly with the middleware's existing architecture and the ecosystem direction:**
+V2 features that align directly with the middleware's existing architecture and the ecosystem direction:
 
-- The V2 `EventLog_HoldingsChange` interface gives the indexer a cleaner, filterable event stream and simplifies the EVM-shaped log emission for `eth_getLogs`.
+- The `EventLog_HoldingsChange` choice on the V2 EventLog interface provides a filterable event stream for holdings-change parsing and EVM-shaped log emission through `eth_getLogs`.
 - Committed allocations and iterated settlement standardize a primitive that maps directly onto x402 facilitator and pre-funded payment flows.
-- Non-holder Account destinations let bridge mint/burn use the standard transfer/allocation flows instead of a custom state machine.
+- Non-holder Account destinations allow Canton-side mint/burn operations to use standard transfer/allocation workflows while retaining the bridge's required cross-chain state management and security controls.
 
 ---
 
@@ -381,11 +417,11 @@ Before any release of the `canton-snap` package to the MetaMask Snap registry, a
 
 In parallel with the Snap audit, an independent third-party security audit of the full middleware stack will cover:
 
-- **API server** (`pkg/ethrpc/`, `cmd/api-server/`): the JSON-RPC method surface, the Interactive Submission orchestration (PrepareSubmission, signing, ExecuteSubmission), session and authentication handling, the EIP-191 registration flow, custodial key handling, and the AES-256-GCM at-rest key storage path.
-- **Relayer** (`pkg/relayer/`, `cmd/relayer/`): the bidirectional Source/Destination engine, bridge state machine, nonce tracking, chain reorg handling, and on-chain event consumption logic.
-- **Indexer** (`pkg/indexer/`, `cmd/indexer/`): event ingestion correctness, deterministic balance and holdings aggregation, visibility-scoped query semantics, and database integrity.
-- **Daml contracts** (`cip56-token`, `bridge-core`), reviewed by a Daml-fluent auditor (Digital Asset, Sygnum, or equivalent specialist): the token authorization model, TransferFactory semantics, Compliance hooks, and bridge mint and burn governance.
-- **Cross-component integration**: the boundary between the API server and the Canton ledger, between the relayer and both chains, and between the indexer and the API server, validated as a single attack surface rather than per-component in isolation.
+- API server (`pkg/ethrpc/`, `cmd/api-server/`): the JSON-RPC method surface, the Interactive Submission orchestration (PrepareSubmission, signing, ExecuteSubmission), session and authentication handling, the EIP-191 registration flow, custodial key handling, and the AES-256-GCM at-rest key storage path.
+- Relayer (`pkg/relayer/`, `cmd/relayer/`): the bidirectional Source/Destination engine, bridge state machine, nonce tracking, chain reorg handling, and on-chain event consumption logic.
+- Indexer (`pkg/indexer/`, `cmd/indexer/`): event ingestion correctness, deterministic balance and holdings aggregation, visibility-scoped query semantics, and database integrity.
+- Daml contracts (`cip56-token`, `bridge-core`), reviewed by a Daml-fluent auditor (Digital Asset, Sygnum, or equivalent specialist): the token authorization model, TransferFactory semantics, Compliance hooks, and bridge mint and burn governance.
+- Cross-component integration: the boundary between the API server and the Canton ledger, between the relayer and both chains, and between the indexer and the API server, validated as a single attack surface rather than per-component in isolation.
 
 Findings from any of the above audits are remediated before the corresponding deliverable is accepted, and full audit reports are published.
 
@@ -399,38 +435,61 @@ All audit reports are published under `docs/audits/` in the relevant repository,
 
 The Applicant is committed to fostering the long-term growth and adoption of their CIP-56/ERC-20 Middleware within the Canton ecosystem. The Applicant has already engaged in discussions with major Ethereum based defi projects who are excited to launch tokens on Canton and become long-term players on the network. The Applicant will earn integration fees and potentially ongoing transaction fees for any third party who they can onboard to Canton via their middleware. The Applicant is thus directly incentivized to bring new liquidity and ongoing transaction volume to Canton and will allocate resources dedicated to achieving these goals throughout the maintenance phase and beyond.
 
-Reflecting the committee's guidance, adoption is **funded and gated** rather than aspirational: the Snap milestone (M5) and the institutional milestone (M6) each hold part of their payment against an adoption gate, the CIP-0112 migration (M7) carries a traction gate, and the entire two-year maintenance term (M8–M15) is released quarter by quarter only against verified ecosystem adoption. In total about 30% of the grant is adoption-contingent. The gates are set at conservative, honestly attestable floors (on-chain party IDs, third-party attestation, or public repository evidence; a confidential-to-Foundation path for private/TradFi adopters), so every adoption payment reflects genuine, independently verifiable value. The Applicant's path to that adoption:
+Reflecting the committee's guidance, adoption is funded and gated rather than aspirational: the Snap milestone (M5) and the institutional milestone (M6) each hold part of their payment against an adoption gate, the CIP-0112 migration (M7) carries a traction gate, and the entire two-year maintenance term (M8–M15) is released quarter by quarter only against verified ecosystem adoption. Under the proposed revised allocation, 11,000,000 CC remains adoption-contingent (approximately 35.5% of total transition value and 40.5% of the estimated Development Fund contribution), subject to the explicitly requested historical-transition exception above. The gates are set at conservative, honestly attestable floors (on-chain party IDs, third-party attestation, or public repository evidence; a confidential-to-Foundation path for private/TradFi adopters), so every adoption payment reflects genuine, independently verifiable value.
 
-- **Reference deployments per signer mode** — stand up publicly accessible reference dapps for the custodial, Snap, and institutional signing modes, so issuers and integrators can evaluate the middleware against a live endpoint.
-- **Issuer onboarding** — work with CIP-56 issuers (stablecoins, tokenized RWAs, Canton-native assets) to route real token activity through the middleware on mainnet, including bridged stablecoins such as USDCx as additional issuances onboard.
-- **Wallet / dapp integration** — enable external wallets and EVM-native dapps to reach Canton tokens through the JSON-RPC surface and the Splice Registry, beyond ChainSafe's own reference dapps.
-- **Snap distribution** — drive installs of the MetaMask Snap from the registry as the non-custodial on-ramp for retail users. ChainSafe has a long standing partnership with MetaMask that will help facilitate this.
-- **Reporting** — track and publish adoption signals (issuers live, integrations shipped, bridged-asset activity, Snap installs) as evidence of ecosystem value.
+The Applicant's path to that adoption:
+- Reference deployments per signer mode — stand up publicly accessible reference dapps for the custodial, Snap, and institutional signing modes, so issuers and integrators can evaluate the middleware against a live endpoint.
+- Issuer onboarding — work with CIP-56 issuers (stablecoins, tokenized RWAs, Canton-native assets) to route real token activity through the middleware on mainnet, including bridged stablecoins such as USDCx as additional issuances onboard.
+- Wallet / dapp integration — enable external wallets and EVM-native dapps to reach Canton tokens through the JSON-RPC surface and the Splice Registry, beyond ChainSafe's own reference dapps.
+- Snap distribution — drive installs of the MetaMask Snap from the registry as the non-custodial on-ramp for retail users. ChainSafe has a long standing partnership with MetaMask that will help facilitate this.
+- Reporting — track and publish adoption signals (issuers live, integrations shipped, bridged-asset activity, Snap installs) as evidence of ecosystem value.
 
 ---
 
 ## Timing and Financials
 
-The grant is a build phase (M1–M6), a CIP-0112 migration milestone (M7), and a two-year quarterly maintenance term (M8–M15) covering bug and security fixes and ecosystem adoption. M1–M4 are paid on committee acceptance; M5, M6 and M7 pay a delivery portion on acceptance and hold a portion to an adoption or traction gate; maintenance milestones (M8–M15) require the committee to accept that quarter's adoption tranche.
+The grant consists of a build phase (M1–M6), a CIP-0112 migration milestone (M7), and a two-year quarterly maintenance term (M8–M15) covering bug and security fixes and ecosystem adoption. The deliverables for M1–M4 and the delivery portion of M5 have been completed and remain subject to committee acceptance and the payment and reconciliation terms below. The separate M5 adoption gate remains outstanding unless and until its stated criteria are satisfied. M6 and M7 each include delivery and adoption or traction conditions, and maintenance milestones M8–M15 require satisfaction of the applicable upkeep and adoption criteria together with the specified continuation vote.
 
-| Milestone | Trigger | Token Amount (CC) |
-|---|---|---|
-| M1: Architecture & Daml / Bridge Contracts | Committee acceptance | 3mil |
-| M2: Middleware Service | Committee acceptance | 5mil |
-| M3: Indexer Backend Service | Committee acceptance | 5mil |
-| M4: Bridge, Relayer, Integration & Docs | Committee acceptance | 5mil |
-| M5: Non-Custodial MetaMask Snap | 4mil delivery + 1mil adoption | 5mil |
-| M6: Institutional Custody, Security Review & Docs | 4mil delivery + 1mil adoption | 5mil |
-| M7: CIP-0112 (V2) Migration | 3mil delivery + 1mil traction | 4mil |
-| M8: Yr1 Q1 Maintenance + adoption tranche | Upkeep bar + adoption tranche | 1mil |
-| M9: Yr1 Q2 Maintenance + adoption tranche | Upkeep bar + adoption tranche | 1mil |
-| M10: Yr1 Q3 Maintenance + adoption tranche | Upkeep bar + adoption tranche | 1mil |
-| M11: Yr1 Q4 Maintenance + adoption tranche | Upkeep bar + adoption tranche | 1mil |
-| M12: Yr2 Q1 Maintenance + adoption tranche | Upkeep bar + adoption tranche | 1mil |
-| M13: Yr2 Q2 Maintenance + adoption tranche | Upkeep bar + adoption tranche | 1mil |
-| M14: Yr2 Q3 Maintenance + adoption tranche | Upkeep bar + adoption tranche | 1mil |
-| M15: Yr2 Q4 Maintenance + adoption tranche | Upkeep bar + adoption tranche | 1mil |
-| **Total** | | **40mil** |
+The total transition value is **31,000,000 CC**, reduced from the previous 40,000,000 CC request. This reflects the amount reported as negotiated following Tokenomics' discounted-cash-flow review of the earned SV entitlement; it is not a representation that the build alone would ordinarily attract this award.
+
+**Proposed allocation for confirmation by the Applicant and Tech & Ops:** apply the 9,000,000 CC reduction to M1–M4, reducing their combined gross allocation from 18,000,000 CC to 9,000,000 CC in the same relative proportions. This preserves all 22,000,000 CC allocated to M5–M15, including the existing 11,000,000 CC of adoption-contingent payments. This allocation is a drafting proposal, not a milestone split established by the prior discussions.
+
+| Milestone | Trigger | Gross Allocation (CC) |
+|---|---|---:|
+| M1: Architecture & Daml / Bridge Contracts | Committee acceptance; accrued SV credit applies | 1,500,000 |
+| M2: Middleware Service | Committee acceptance; remaining accrued SV credit applies | 2,500,000 |
+| M3: Indexer Backend Service | Committee acceptance | 2,500,000 |
+| M4: Bridge, Relayer, Integration & Docs | Committee acceptance | 2,500,000 |
+| M5: Non-Custodial MetaMask Snap | 4,000,000 delivery + 1,000,000 adoption | 5,000,000 |
+| M6: Institutional Custody, Security Review & Docs | 4,000,000 delivery + 1,000,000 adoption | 5,000,000 |
+| M7: CIP-0112 (V2) Migration | 3,000,000 delivery + 1,000,000 traction | 4,000,000 |
+| M8: Yr1 Q1 Maintenance + adoption tranche | Upkeep bar + adoption tranche + continuation vote | 1,000,000 |
+| M9: Yr1 Q2 Maintenance + adoption tranche | Upkeep bar + adoption tranche + continuation vote | 1,000,000 |
+| M10: Yr1 Q3 Maintenance + adoption tranche | Upkeep bar + adoption tranche + continuation vote | 1,000,000 |
+| M11: Yr1 Q4 Maintenance + adoption tranche | Upkeep bar + adoption tranche + continuation vote | 1,000,000 |
+| M12: Yr2 Q1 Maintenance + adoption tranche | Upkeep bar + adoption tranche + continuation vote | 1,000,000 |
+| M13: Yr2 Q2 Maintenance + adoption tranche | Upkeep bar + adoption tranche + continuation vote | 1,000,000 |
+| M14: Yr2 Q3 Maintenance + adoption tranche | Upkeep bar + adoption tranche + continuation vote | 1,000,000 |
+| M15: Yr2 Q4 Maintenance + adoption tranche | Upkeep bar + adoption tranche + continuation vote | 1,000,000 |
+| **Total transition value** | **Inclusive of the accrued SV credit below** | **31,000,000** |
+
+### Accrued SV Credit and Net Development Fund Request
+
+Let **A** be the final reconciled accrued SV reward amount expressly included in this transition, currently estimated at **3,850,000 CC**. It is included within, not added to, the 31,000,000 CC total. The Development Fund's maximum contribution is therefore **31,000,000 CC − A**, currently estimated at **27,150,000 CC**. The accrued amount remains SV-origin for locking purposes and is released or retained under the separately endorsed SV settlement; it is not minted or paid a second time by the Development Fund.
+
+**Proposed offset for confirmation:** credit A against M1 first, then M2, and, if necessary, the remaining M1–M4 allocations in milestone order. At the current estimate, this applies 1,500,000 CC to M1 and 2,350,000 CC to M2. The resulting maximum new Development Fund payments for M1–M4 are 0 CC, 150,000 CC, 2,500,000 CC and 2,500,000 CC respectively, totaling **5,150,000 CC**. The credit is an accounting allocation of previously earned SV rewards, not deemed acceptance of any grant deliverable. Any new Development Fund payment still requires acceptance of the corresponding milestone.
+
+| Funding Reconciliation | CC |
+|---|---:|
+| Gross transition value | 31,000,000 |
+| Less accrued SV-origin amount, estimated and subject to reconciliation | (3,850,000) |
+| **Estimated maximum new Development Fund funding** | **27,150,000** |
+| Of which: net M1–M4, subject to acceptance | 5,150,000 |
+| Of which: M5–M15, subject to their existing delivery/adoption gates | 22,000,000 |
+
+Before the vote, the Applicant and Foundation must confirm the final accrued amount and cutoff, the proposed offset, and which M1–M4 payments, if any, are being requested at transition. No new Development Fund disbursement will precede the effective transition and required approvals.
+
+Reconciliation changes the net grant contribution CC-for-CC within the 31,000,000 CC cap; it does not automatically reduce or waive the future adoption gates. Any change to the agreed milestone allocation requires the Applicant's agreement and the relevant committee approval, with an updated schedule published here.
 
 ### Long-Term Sustainment (Post-Year 2)
 
@@ -444,7 +503,7 @@ This baseline commitment is funded by the Applicant's out of pocket and continue
 
 Beyond the baseline, two options remain open for the Foundation and ecosystem to consider closer to the end of Year 2:
 
-- **Foundation-funded maintainer rotation**, under which the repository becomes Foundation-stewarded with a rotating maintainer schedule across ecosystem contributors.
-- **A ChainSafe paid-SLA tier** funded by issuers or operators who require guaranteed response times for production deployments.
+- Foundation-funded maintainer rotation, under which the repository becomes Foundation-stewarded with a rotating maintainer schedule across ecosystem contributors.
+- A ChainSafe paid-SLA tier funded by issuers or operators who require guaranteed response times for production deployments.
 
 The Applicant is happy to discuss either path with the Foundation or ecosystem operators when the time comes; neither is a precondition for the baseline sustainment commitment above.
